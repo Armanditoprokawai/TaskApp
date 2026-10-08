@@ -1,0 +1,107 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>TaskApp</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="task-content">
+  <main class="page-shell">
+    <section class="welcome">
+      <p class="eyebrow">ORGANIZA TU SEMANA</p>
+      <h1>Mis tareas</h1>
+      <p class="subtitle">Un paso a la vez. Mantén tus actividades académicas al día.</p>
+    </section>
+
+    @if (mostrarFormulario) {
+      <section class="form-card" aria-labelledby="form-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">NUEVA ACTIVIDAD</p>
+            <h2 id="form-title">Agregar tarea</h2>
+          </div>
+          <ion-button fill="clear" color="medium" aria-label="Cerrar formulario" (click)="alternarFormulario()">Cerrar</ion-button>
+        </div>
+
+        <form [formGroup]="formulario" (ngSubmit)="agregarTarea()" novalidate>
+          <ion-item lines="none" class="input-item">
+            <ion-label position="stacked">Título *</ion-label>
+            <ion-input formControlName="titulo" placeholder="Ej. Preparar exposición" maxlength="80"></ion-input>
+          </ion-item>
+          @if (formulario.controls.titulo.touched && formulario.controls.titulo.hasError('required')) {
+            <p class="field-error">Escribe un título para la tarea.</p>
+          } @else if (formulario.controls.titulo.touched && formulario.controls.titulo.hasError('minlength')) {
+            <p class="field-error">El título debe tener al menos 5 caracteres.</p>
+          }
+
+          <ion-item lines="none" class="input-item">
+            <ion-label position="stacked">Descripción corta</ion-label>
+            <ion-textarea formControlName="descripcion" placeholder="Añade un detalle (opcional)" rows="2" autoGrow="true" maxlength="180"></ion-textarea>
+          </ion-item>
+
+          <ion-item lines="none" class="input-item">
+            <ion-label position="stacked">Prioridad</ion-label>
+            <ion-select formControlName="prioridad" interface="popover" aria-label="Prioridad de la tarea">
+              <ion-select-option value="Alta">Alta</ion-select-option>
+              <ion-select-option value="Media">Media</ion-select-option>
+              <ion-select-option value="Baja">Baja</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-button expand="block" type="submit" class="save-button">Guardar tarea</ion-button>
+        </form>
+      </section>
+    }
+
+    <section class="list-section" aria-labelledby="list-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">TU LISTA</p>
+          <h2 id="list-title">Pendientes y completadas</h2>
+        </div>
+        <span class="task-count">{{ tareas.length }} {{ tareas.length === 1 ? 'tarea' : 'tareas' }}</span>
+      </div>
+
+      @if (tareas.length === 0) {
+        <div class="empty-state">
+          <ion-icon name="clipboard-outline" aria-hidden="true"></ion-icon>
+          <h3>Aún no hay tareas</h3>
+          <p>Usa el botón + para agregar tu primera actividad.</p>
+        </div>
+      } @else {
+        <ion-list class="task-list">
+          @for (tarea of tareas; track tarea.id) {
+            <ion-item class="task-item" lines="none" [class.is-complete]="tarea.completada">
+              <ion-checkbox slot="start" [checked]="tarea.completada" [aria-label]="'Marcar ' + tarea.titulo + ' como completada'" (ionChange)="completarTarea(tarea.id)"></ion-checkbox>
+              <ion-label class="ion-text-wrap">
+                <div class="task-title-row">
+                  <h3 [class.completed-text]="tarea.completada">{{ tarea.titulo }}</h3>
+                  <ion-badge [class]="clasePrioridad(tarea.prioridad)">{{ tarea.prioridad }}</ion-badge>
+                </div>
+                @if (tarea.descripcion) {
+                  <p [class.completed-text]="tarea.completada">{{ tarea.descripcion }}</p>
+                } @else {
+                  <p class="no-description">Sin descripción</p>
+                }
+              </ion-label>
+              <ion-button slot="end" fill="clear" color="danger" class="delete-button" [aria-label]="'Eliminar ' + tarea.titulo" (click)="eliminarTarea(tarea.id)">
+                <ion-icon slot="icon-only" name="trash-outline" aria-hidden="true"></ion-icon>
+              </ion-button>
+            </ion-item>
+          }
+        </ion-list>
+      }
+    </section>
+  </main>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button aria-label="Agregar tarea" (click)="alternarFormulario()">
+      <ion-icon name="add-outline" aria-hidden="true"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>
+
+<ion-footer class="app-footer">
+  <ion-toolbar>
+    <ion-title size="small">TaskApp · Hecho para estudiar con más calma</ion-title>
+  </ion-toolbar>
+</ion-footer>
